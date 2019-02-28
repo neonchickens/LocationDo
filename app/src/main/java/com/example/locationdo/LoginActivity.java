@@ -25,10 +25,7 @@ import java.sql.Statement;
 public class LoginActivity extends AppCompatActivity {
     EditText username;
     EditText password;
-
-    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433;databaseName=LocationDo;integratedSecurity=true";
-    private static final String DB_USERNAME = "Administrator";
-    private static final String DB_PASSWORD = "CIT386!";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,24 +42,23 @@ public class LoginActivity extends AppCompatActivity {
     public void transition(View view) {
 
         String strUsername = username.getText().toString();
-        String strPassword = password.getText().toString(); //SHA512(password.getText().toString());
+        String strPassword = SHA512(password.getText().toString());
 
         try {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
             StrictMode.setThreadPolicy(policy);
             Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            Connection con = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+            Connection con = DriverManager.getConnection(DB_URL);
 
             Statement statement = con.createStatement();
             ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
+
             while (resultat.next()) {
-
-                String id = resultat.getString(1);
-
-                if (id != null) {
+                int id = resultat.getInt("id");
+                if (id != -1) {
                     Toast.makeText(this,"Success", Toast.LENGTH_LONG);
                     //TODO
-                    //Switch to map activity
+                    //Switch to list activity
                     //Pass id for sql
                 } else {
                     Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
@@ -130,7 +126,6 @@ public class LoginActivity extends AppCompatActivity {
         if(requestCode == 1){
             if(resultCode == RESULT_OK){
                 username.setText(data.getStringExtra(com.example.locationdo.Register.USERNAME));
-                password.setText(data.getStringExtra(com.example.locationdo.Register.PASSWORD));
             }
         }
 
