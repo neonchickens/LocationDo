@@ -82,6 +82,8 @@ public class ListActivity extends AppCompatActivity {
 
                         String desc = String.valueOf(descEditText.getText());
 
+                        // TODO - try to get and set lat&long
+
                         // create task object to save
                         Task newTask = new Task(title, desc);
                         toDoList.add(newTask);
@@ -113,6 +115,8 @@ public class ListActivity extends AppCompatActivity {
         final EditText descEditText = new EditText(ListActivity.this);
         descEditText.setHint(task.strDesc);
         layout.addView(descEditText);
+
+        // could add an update location button here
 
         // create alert dialog
         AlertDialog dialog = new AlertDialog.Builder(this)
@@ -221,7 +225,5 @@ public class ListActivity extends AppCompatActivity {
             strTitle = task;
             strDesc = desc;
         }
-
     }
-
 }
