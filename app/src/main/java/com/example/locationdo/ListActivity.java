@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
-//import android.support.design.widget.FloatingActionButton;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -23,13 +23,19 @@ import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class ListActivity extends AppCompatActivity {
     private static final String TAG = "ListActivity";
     ArrayList<Task> toDoList;
     TaskAdapter listAdapter;
+    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
     private int id;
 
@@ -42,7 +48,7 @@ public class ListActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        int id = intent.getIntExtra("id", -1);
+        id = intent.getIntExtra("id", -1);
 
         if(id == -1){
             // TODO - send back to login
@@ -63,8 +69,38 @@ public class ListActivity extends AppCompatActivity {
         listView.setAdapter(listAdapter);
 
         // TODO - populate array list from remote server
+        loadTasks();
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+    }
+
+    public void loadTasks(){
+        try {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            Connection con = DriverManager.getConnection(DB_URL);
+
+            Statement statement = con.createStatement();
+
+            ResultSet resultat = statement.executeQuery(
+                        "SELECT * " +
+                            "FROM TASK " +
+                            "JOIN USERTASK ON (TASK.ID = USERTASK.TASK_ID)" +
+                                "WHERE USERTASK.ACCOUNT_ID =" + id);
+
+            while (resultat.next()) {
+                Task newTask = new Task(resultat.getInt("id"), (resultat.getByte("status")!= 0),
+                        resultat.getString("name"), resultat.getString("description"),
+                        resultat.getString("latitude"), resultat.getString("longitude"));
+                listAdapter.add(newTask);
+                Toast.makeText(this,"Loaded tasks from remote.", Toast.LENGTH_LONG);
+            }
+            resultat.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     // when the add button is pressed
@@ -225,12 +261,21 @@ public class ListActivity extends AppCompatActivity {
     // custom task object
     public class Task{
 
-        private int id;
+        private int taskID;
         private String strTitle;
         private String strDesc;
         private boolean boolStatus;
         private String strLat;
         private String strLong;
+
+        Task(int inID, boolean status, String task, String desc, String lat, String longi){
+            taskID = inID;
+            boolStatus = status;
+            strTitle = task;
+            strDesc = desc;
+            strLat = lat;
+            strLong = longi;
+        }
 
         Task(String task, String desc, String lat, String longi){
             boolStatus = false;
