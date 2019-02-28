@@ -18,6 +18,7 @@ import java.util.regex.Pattern;
 public class Register extends AppCompatActivity {
     EditText username;
     EditText password;
+    private static final String URL = "34.201.242.17";
     public static final String USERNAME = "com.example.android.CIT268.extra.USERNAME";
     public static final String PASSWORD = "com.example.android.CIT268.extra.PASSWORD";
 

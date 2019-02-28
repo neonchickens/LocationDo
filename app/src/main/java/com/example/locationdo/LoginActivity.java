@@ -1,10 +1,21 @@
 package com.example.locationdo;
 
 import android.content.Intent;
+import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 
 /**
  * This is the login activity for LocationDo app.
@@ -15,6 +26,9 @@ public class LoginActivity extends AppCompatActivity {
     EditText username;
     EditText password;
 
+    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433;databaseName=LocationDo;integratedSecurity=true";
+    private static final String DB_USERNAME = "Administrator";
+    private static final String DB_PASSWORD = "CIT386!";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -29,15 +43,61 @@ public class LoginActivity extends AppCompatActivity {
      * @param view
      */
     public void transition(View view) {
+
+        String strUsername = username.getText().toString();
+        String strPassword = password.getText().toString(); //SHA512(password.getText().toString());
+
+        try {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            Connection con = DriverManager.getConnection(DB_URL, DB_USERNAME, DB_PASSWORD);
+
+            Statement statement = con.createStatement();
+            ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
+            while (resultat.next()) {
+
+                String id = resultat.getString(1);
+
+                if (id != null) {
+                    Toast.makeText(this,"Success", Toast.LENGTH_LONG);
+                    //TODO
+                    //Switch to map activity
+                    //Pass id for sql
+                } else {
+                    Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
+                }
+
+            }
+            resultat.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private static String SHA512(String strPassword) {
+        try {
+            MessageDigest md = MessageDigest.getInstance("SHA-512");
+            byte[] digest = md.digest(strPassword.getBytes(StandardCharsets.UTF_8));
+            char[] hex = new char[digest.length * 2];
+            for (int i = 0; i < digest.length; i++) {
+                hex[2 * i] = "0123456789abcdef".charAt((digest[i] & 0xf0) >> 4);
+                hex[2 * i + 1] = "0123456789abcdef".charAt(digest[i] & 0x0f);
+            }
+            return new String(hex);
+        } catch (NoSuchAlgorithmException e) {
+            throw new IllegalStateException(e);
+        }
     }
 
     /**
      * Method for validating Username with database
      */
     private void validateUsername(EditText editText){
-        String username;
-        editText = findViewById(R.id.enterUsername);
-        username = editText.getText().toString();
+
+        String strUsername = editText.getText().toString();
     }
 
     /**
@@ -45,10 +105,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private void validatePassword(EditText editText){
 
-        editText = findViewById(R.id.enterPassword);
-        char[] password = editText.getText().toString().toCharArray();
-
-
+        //String password = editText.getText().toString();
     }
 
     /**
