@@ -38,7 +38,6 @@ public class ListActivity extends AppCompatActivity {
     private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
     private int id;
-    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
 
     @Override
@@ -141,38 +140,12 @@ public class ListActivity extends AppCompatActivity {
                         Task newTask = new Task(title, desc);
                         toDoList.add(newTask);
 
-                        Intent intent = new Intent(this, com.example.locationdo.MapsSelector.class);
+                        Intent intent = new Intent(getApplicationContext(), com.example.locationdo.MapsSelector.class);
                         intent.putExtra("title", title);
                         intent.putExtra("desc", desc);
+                        intent.putExtra("id", id);
                         startActivity(intent);
 
-                        try {
-                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                            StrictMode.setThreadPolicy(policy);
-                            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-                            Connection con = DriverManager.getConnection(DB_URL);
-
-                            Statement statement = con.createStatement();
-                            int result = statement.executeUpdate("INSERT INTO TASK (name, description, status, latitude, longitude) " +
-                                    "VALUES ('" + title + "', '" + desc + "', '0', '" + longitutde + "', '" + latitude + "')", Statement.RETURN_GENERATED_KEYS);
-
-                            if (result == 1) {
-                                ResultSet rs = statement.getGeneratedKeys();
-                                while (rs.next()) {
-                                    int taskid = rs.getInt("id");
-                                    int result2 = statement.executeUpdate("INSERT INTO USERTASK (account_id, task_id) " +
-                                            "VALUES ('" + id + "', '" + taskid + "')");
-                                    if (result2 == 1) {
-                                        //Success
-                                    }
-
-                                }
-                            }
-
-                            statement.close();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
                     }
                 })
                 .setNegativeButton("Cancel", null)
