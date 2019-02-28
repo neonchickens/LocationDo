@@ -99,11 +99,6 @@ public class ListActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // TODO - update task completion bool when checkbox is toggled
-    public void onCheckBox(){
-
-    }
-
     // open edit/delete dialog when edit button is pressed
     public void onEditClick(final int position, Task task){
         /*
@@ -114,11 +109,11 @@ public class ListActivity extends AppCompatActivity {
         layout.setOrientation(LinearLayout.VERTICAL);
 
         final EditText titleEditText = new EditText(ListActivity.this);
-        titleEditText.setHint(task.strTitle);
+        titleEditText.setText(task.strTitle);
         layout.addView(titleEditText);
 
         final EditText descEditText = new EditText(ListActivity.this);
-        descEditText.setHint(task.strDesc);
+        descEditText.setText(task.strDesc);
         layout.addView(descEditText);
 
         // could add an update location button here
@@ -160,7 +155,7 @@ public class ListActivity extends AppCompatActivity {
     }
 
     // custom data adapter to connect listview to arraylist & init each list item
-    public class TaskAdapter extends ArrayAdapter<Task> {
+    public class TaskAdapter extends ArrayAdapter<Task>  {
         public TaskAdapter(Context context, ArrayList<Task> users) {
             super(context, 0, users);
         }
@@ -188,6 +183,13 @@ public class ListActivity extends AppCompatActivity {
             ImageButton btnLoc = (ImageButton)convertView.findViewById(R.id.btnLocation);
 
             // set button listeners
+            chkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+                @Override
+                public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                    toDoList.get(position).setCompletion(isChecked);
+                }
+            });
+
             btnEdit.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
@@ -229,6 +231,10 @@ public class ListActivity extends AppCompatActivity {
             boolStatus = false;
             strTitle = task;
             strDesc = desc;
+        }
+
+        public void setCompletion(boolean status){
+            boolStatus = status;
         }
     }
 }
