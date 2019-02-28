@@ -3,9 +3,11 @@ package com.example.locationdo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
 //import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -38,22 +40,29 @@ public class ListActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        id = savedInstanceState.getInt("id");
+        Intent intent = getIntent();
 
-        /*FloatingActionButton fab = findViewById(R.id.fab);
+        int id = intent.getIntExtra("id", -1);
+
+        if(id == -1){
+            // TODO - send back to login
+        }
+
+        FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onAddClick();
             }
         });
-        */
 
         toDoList = new ArrayList<Task>();
         listAdapter = new TaskAdapter(this, toDoList);
 
         ListView listView = (ListView) findViewById(R.id.list_view);
         listView.setAdapter(listAdapter);
+
+        // TODO - populate array list from remote server
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
@@ -92,6 +101,8 @@ public class ListActivity extends AppCompatActivity {
                         // create task object to save
                         Task newTask = new Task(title, desc);
                         toDoList.add(newTask);
+
+                        // TODO - update remote server
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -132,6 +143,7 @@ public class ListActivity extends AppCompatActivity {
                         // create task object to save
                         Task newTask = new Task(title, desc);
                         toDoList.set(position, newTask);
+                        // TODO - update remote server task
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -142,6 +154,7 @@ public class ListActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         toDoList.remove(position);
                         listAdapter.notifyDataSetChanged();
+                        // TODO - delete remote server task
                     }
                 })
                 .create();
