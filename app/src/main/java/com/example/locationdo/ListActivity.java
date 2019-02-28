@@ -13,7 +13,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
@@ -51,7 +55,6 @@ public class ListActivity extends AppCompatActivity {
 
     // when the add button is pressed
     public void onAddClick(){
-
         /*
         An alert dialog can only hold one editText by default, so we create a layout
         view to hold the two fields we need.
@@ -89,37 +92,74 @@ public class ListActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // update task completion bool when checkbox is toggled
+    // TODO - update task completion bool when checkbox is toggled
     public void onCheckBox(){
 
     }
 
     // open edit/delete dialog when edit button is pressed
-    public void onEditClick(){
-        // change title field
-        // change desc field
-        // update location
-        // button to delete
+    public void onEditClick(final int position, Task task){
+        /*
+        An alert dialog can only hold one editText by default, so we create a layout
+        view to hold the two fields we need.
+         */
+        LinearLayout layout = new LinearLayout(ListActivity.this);
+        layout.setOrientation(LinearLayout.VERTICAL);
+
+        final EditText titleEditText = new EditText(ListActivity.this);
+        titleEditText.setHint(task.strTitle);
+        layout.addView(titleEditText);
+
+        final EditText descEditText = new EditText(ListActivity.this);
+        descEditText.setHint(task.strDesc);
+        layout.addView(descEditText);
+
+        // create alert dialog
+        AlertDialog dialog = new AlertDialog.Builder(this)
+                .setTitle("Edit task")
+                .setView(layout)
+                .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        String title = String.valueOf(titleEditText.getText());
+                        String desc = String.valueOf(descEditText.getText());
+                        Log.d(TAG, "Task to edit: " + title);
+
+                        // create task object to save
+                        Task newTask = new Task(title, desc);
+                        toDoList.set(position, newTask);
+                    }
+                })
+                .setNegativeButton("Cancel", null)
+
+                //delete button
+                .setNeutralButton("Delete", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        toDoList.remove(position);
+                        listAdapter.notifyDataSetChanged();
+                    }
+                })
+                .create();
+        dialog.show();
 
     }
 
+    // TODO - go to map activity
     public void onLocationClick(){
-        // go to map activity
-    }
-
-    public void deleteTask(){
 
     }
 
+    // custom data adapter to connect listview to arraylist & init each list item
     public class TaskAdapter extends ArrayAdapter<Task> {
         public TaskAdapter(Context context, ArrayList<Task> users) {
             super(context, 0, users);
         }
 
         @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
+        public View getView(final int position, View convertView, ViewGroup parent) {
             // Get the data item for this position
-            Task task = getItem(position);
+            final Task task = getItem(position);
             // Check if an existing view is being reused, otherwise inflate the view
             if (convertView == null) {
                 convertView = LayoutInflater.from(getContext()).inflate(R.layout.list_item, parent, false);
@@ -133,12 +173,32 @@ public class ListActivity extends AppCompatActivity {
             tvTitle.setText(task.strTitle);
             tvDesc.setText(task.strDesc);
 
+            // get buttons
+            CheckBox chkBox = (CheckBox)convertView.findViewById(R.id.checkBox);
+            Button btnEdit = (Button)convertView.findViewById(R.id.btnEdit);
+            ImageButton btnLoc = (ImageButton)convertView.findViewById(R.id.btnLocation);
+
+            // set button listeners
+            btnEdit.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    onEditClick(position, task);
+                }
+            });
+
+            btnLoc.setOnClickListener(new View.OnClickListener(){
+                @Override
+                public void onClick(View v){
+                    onLocationClick();
+                }
+            });
+
             // Return the completed view to render on screen
             return convertView;
         }
     }
 
-
+    // custom task object
     public class Task{
 
         private int id;
