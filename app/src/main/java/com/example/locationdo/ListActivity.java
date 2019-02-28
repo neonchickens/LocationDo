@@ -3,6 +3,7 @@ package com.example.locationdo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.location.LocationManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -41,11 +42,14 @@ public class ListActivity extends AppCompatActivity {
 
         toDoList = new ArrayList<Task>();
         listAdapter = new TaskAdapter(this, toDoList);
+
         ListView listView = (ListView) findViewById(R.id.list_view);
         listView.setAdapter(listAdapter);
+
+        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
 
-    // when the add button is clicked
+    // when the add button is pressed
     public void onAddClick(){
 
         /*
@@ -85,7 +89,25 @@ public class ListActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    public void listUpdate(){
+    // update task completion bool when checkbox is toggled
+    public void onCheckBox(){
+
+    }
+
+    // open edit/delete dialog when edit button is pressed
+    public void onEditClick(){
+        // change title field
+        // change desc field
+        // update location
+        // button to delete
+
+    }
+
+    public void onLocationClick(){
+        // go to map activity
+    }
+
+    public void deleteTask(){
 
     }
 
