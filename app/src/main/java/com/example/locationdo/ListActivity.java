@@ -6,7 +6,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.location.LocationManager;
 import android.os.Bundle;
-//import android.support.design.widget.FloatingActionButton;
+import android.os.StrictMode;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -24,6 +24,10 @@ import android.widget.LinearLayout;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
 import java.util.ArrayList;
 
 public class ListActivity extends AppCompatActivity {
@@ -32,6 +36,8 @@ public class ListActivity extends AppCompatActivity {
     TaskAdapter listAdapter;
 
     private int id;
+    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -97,12 +103,44 @@ public class ListActivity extends AppCompatActivity {
                         String desc = String.valueOf(descEditText.getText());
 
                         // TODO - try to get and set lat&long
+                        float latitude = 0, longitutde = 0;
 
                         // create task object to save
                         Task newTask = new Task(title, desc);
                         toDoList.add(newTask);
 
-                        // TODO - update remote server
+                        Intent intent = new Intent(this, com.example.locationdo.MapsSelector.class);
+                        intent.putExtra("title", title);
+                        intent.putExtra("desc", desc);
+                        startActivity(intent);
+
+                        try {
+                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                            StrictMode.setThreadPolicy(policy);
+                            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+                            Connection con = DriverManager.getConnection(DB_URL);
+
+                            Statement statement = con.createStatement();
+                            int result = statement.executeUpdate("INSERT INTO TASK (name, description, status, latitude, longitude) " +
+                                    "VALUES ('" + title + "', '" + desc + "', '0', '" + longitutde + "', '" + latitude + "')", Statement.RETURN_GENERATED_KEYS);
+
+                            if (result == 1) {
+                                ResultSet rs = statement.getGeneratedKeys();
+                                while (rs.next()) {
+                                    int taskid = rs.getInt("id");
+                                    int result2 = statement.executeUpdate("INSERT INTO USERTASK (account_id, task_id) " +
+                                            "VALUES ('" + id + "', '" + taskid + "')");
+                                    if (result2 == 1) {
+                                        //Success
+                                    }
+
+                                }
+                            }
+
+                            statement.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", null)
