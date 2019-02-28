@@ -5,7 +5,7 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.location.LocationManager;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
+//import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -29,6 +29,8 @@ public class ListActivity extends AppCompatActivity {
     ArrayList<Task> toDoList;
     TaskAdapter listAdapter;
 
+    private int id;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -36,13 +38,16 @@ public class ListActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        FloatingActionButton fab = findViewById(R.id.fab);
+        id = savedInstanceState.getInt("id");
+
+        /*FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 onAddClick();
             }
         });
+        */
 
         toDoList = new ArrayList<Task>();
         listAdapter = new TaskAdapter(this, toDoList);

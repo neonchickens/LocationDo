@@ -60,6 +60,10 @@ public class LoginActivity extends AppCompatActivity {
                     //TODO
                     //Switch to list activity
                     //Pass id for sql
+
+                    Intent intent = new Intent(this, com.example.locationdo.ListActivity.class);
+                    intent.putExtra("id", id);
+                    startActivity(intent);
                 } else {
                     Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
                 }
