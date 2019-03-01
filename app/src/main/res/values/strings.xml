@@ -1,3 +1,10 @@
 <resources>
     <string name="app_name">LocationDo</string>
+    <string name="password">Password</string>
+    <string name="username">Username</string>
+    <string name="submit">Submit</string>
+    <string name="register">Register</string>
+    <string name="title_activity_maps">Map</string>
+    <string name="title_activity_list">ListActivity</string>
+    <string name="btnTempToList">To List</string>
 </resources>
