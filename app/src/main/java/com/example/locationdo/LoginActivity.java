@@ -35,6 +35,14 @@ public class LoginActivity extends AppCompatActivity {
         password = findViewById(R.id.enterPassword);
     }
 
+    @Override
+    protected void onResume()
+    {
+        // TODO Auto-generated method stub
+        super.onResume();
+        password.setText("");
+    }
+
     /**
      * Method for the intent to log in to map activity
      * @param view
@@ -115,6 +123,41 @@ public class LoginActivity extends AppCompatActivity {
     public void register(View view) {
         Intent intent = new Intent(this, com.example.locationdo.Register.class);
         startActivityForResult(intent, 1);
+    }
+    public void modify(View view) {
+        String strUsername = username.getText().toString();
+        String strPassword = SHA512(password.getText().toString());
+
+        try {
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            Connection con = DriverManager.getConnection(DB_URL);
+
+            Statement statement = con.createStatement();
+            ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
+
+            while (resultat.next()) {
+                int id = resultat.getInt("id");
+                if (id != -1) {
+                    Toast.makeText(this,"Success", Toast.LENGTH_LONG);
+                    //TODO
+                    //Switch to list activity
+                    //Pass id for sql
+
+                    Intent intent = new Intent(this, com.example.locationdo.Modify.class);
+                    intent.putExtra("id", id);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
+                }
+
+            }
+            resultat.close();
+            statement.close();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**

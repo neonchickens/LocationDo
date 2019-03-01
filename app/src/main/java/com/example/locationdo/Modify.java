@@ -30,12 +30,15 @@ public class Modify extends AppCompatActivity {
     public static final String USERNAME = "com.example.android.CIT268.extra.USERNAME";
     public static final String PASSWORD = "com.example.android.CIT268.extra.PASSWORD";
 
+    private int id;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_modfiy);
         username = findViewById(R.id.enterUsername);
         password = findViewById(R.id.enterPassword);
+        Intent intent = getIntent();
+        id = intent.getIntExtra("id", -1);
     }
 
     /**
@@ -44,7 +47,6 @@ public class Modify extends AppCompatActivity {
      */
     public void transition(View view) {
 
-        String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());
 
         try {
@@ -54,11 +56,10 @@ public class Modify extends AppCompatActivity {
             Connection con = DriverManager.getConnection(DB_URL);
 
             Statement statement = con.createStatement();
-            int result = statement.executeUpdate("INSERT INTO ACCOUNT (username, password) VALUES ('" + strUsername + "', '" + strPassword + "')");
+            int result = statement.executeUpdate("UPDATE ACCOUNT SET password = '" + strPassword + "' WHERE id = '" + id +"'");
 
             if (result == 1) {
                 Intent returnIntent = new Intent();
-                returnIntent.putExtra(USERNAME, strUsername);
                 setResult(RESULT_OK, returnIntent);
                 finish();
             }
