@@ -107,7 +107,7 @@ public class MapsSelector extends FragmentActivity implements GoogleMap.OnMyLoca
 
             Statement statement = con.createStatement();
             int result = statement.executeUpdate("INSERT INTO TASK (name, description, status, latitude, longitude) " +
-                    "VALUES ('" + title + "', '" + desc + "', '0', '" + point.latitude + "', '" + point.longitutde + "')", Statement.RETURN_GENERATED_KEYS);
+                    "VALUES ('" + title + "', '" + desc + "', '0', '" + point.latitude + "', '" + point.longitude + "')", Statement.RETURN_GENERATED_KEYS);
 
             if (result == 1) {
                 ResultSet rs = statement.getGeneratedKeys();
