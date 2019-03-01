@@ -1,6 +1,7 @@
 package com.example.locationdo;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.support.annotation.NonNull;
@@ -19,6 +20,9 @@ import com.google.android.gms.maps.model.MarkerOptions;
 public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
 
     private GoogleMap mMap;
+    private String strLat;
+    private String strLong;
+    private String strTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -28,6 +32,13 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+
+        Intent intent = getIntent();
+        strLat = intent.getStringExtra("latitude");
+        strLong = intent.getStringExtra("longitude");
+        strTitle = intent.getStringExtra("title");
+
+
     }
 
 
@@ -51,10 +62,11 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         }
         mMap.setOnMyLocationButtonClickListener(this);
         mMap.setOnMyLocationClickListener(this);
-        // Add a marker in Sydney and move the camera
-        LatLng sydney = new LatLng(-34, 151);
-        mMap.addMarker(new MarkerOptions().position(sydney).title("Marker in Sydney"));
-        mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
+
+        LatLng mark = new LatLng(Float.valueOf(strLat), Float.valueOf(strLong));
+        mMap.addMarker(new MarkerOptions().position(mark).title(strTitle));
+
+        mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mark, 15.0f));
     }
 
     @Override

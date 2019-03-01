@@ -9,6 +9,7 @@ import android.os.StrictMode;
 import android.support.annotation.NonNull;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.content.ContextCompat;
+import android.util.Log;
 import android.widget.Toast;
 
 import com.google.android.gms.maps.CameraUpdateFactory;
@@ -107,7 +108,7 @@ public class MapsSelector extends FragmentActivity implements GoogleMap.OnMyLoca
 
             Statement statement = con.createStatement();
             int result = statement.executeUpdate("INSERT INTO TASK (name, description, status, latitude, longitude) " +
-                    "VALUES ('" + title + "', '" + desc + "', '0', '" + point.latitude + "', '" + point.longitutde + "')", Statement.RETURN_GENERATED_KEYS);
+                    "VALUES ('" + title + "', '" + desc + "', '0', '" + point.latitude + "', '" + point.longitude + "')", Statement.RETURN_GENERATED_KEYS);
 
             if (result == 1) {
                 ResultSet rs = statement.getGeneratedKeys();
@@ -116,13 +117,16 @@ public class MapsSelector extends FragmentActivity implements GoogleMap.OnMyLoca
                     int result2 = statement.executeUpdate("INSERT INTO USERTASK (account_id, task_id) " +
                             "VALUES ('" + id + "', '" + taskid + "')");
                     if (result2 == 1) {
-                        Intent intent = new Intent(getApplicationContext(), com.example.locationdo.ListActivity.class);
                     }
 
                 }
             }
 
             statement.close();
+
+            Intent intent = new Intent(getApplicationContext(), com.example.locationdo.ListActivity.class);
+            intent.putExtra("id", id);
+            startActivity(intent);
         } catch (Exception e) {
             e.printStackTrace();
         }

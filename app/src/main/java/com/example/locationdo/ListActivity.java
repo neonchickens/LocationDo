@@ -154,7 +154,7 @@ public class ListActivity extends AppCompatActivity {
     }
 
     // open edit/delete dialog when edit button is pressed
-    public void onEditClick(final int position, Task task){
+    public void onEditClick(final int position, final Task task){
         /*
         An alert dialog can only hold one editText by default, so we create a layout
         view to hold the two fields we need.
@@ -176,6 +176,7 @@ public class ListActivity extends AppCompatActivity {
         AlertDialog dialog = new AlertDialog.Builder(this)
                 .setTitle("Edit task")
                 .setView(layout)
+
                 .setPositiveButton("Confirm", new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
@@ -187,6 +188,20 @@ public class ListActivity extends AppCompatActivity {
                         Task newTask = new Task(title, desc);
                         toDoList.set(position, newTask);
                         // TODO - update remote server task
+
+                        try {
+                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                            StrictMode.setThreadPolicy(policy);
+                            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+                            Connection con = DriverManager.getConnection(DB_URL);
+
+                            Statement statement = con.createStatement();
+                            int result = statement.executeUpdate("UPDATE TASK SET name = '" + title + "', description = '" + desc + "' WHERE ID = '" + task.taskID + "')");
+
+                            statement.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 })
                 .setNegativeButton("Cancel", null)
@@ -198,6 +213,20 @@ public class ListActivity extends AppCompatActivity {
                         toDoList.remove(position);
                         listAdapter.notifyDataSetChanged();
                         // TODO - delete remote server task
+
+                        try {
+                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                            StrictMode.setThreadPolicy(policy);
+                            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+                            Connection con = DriverManager.getConnection(DB_URL);
+
+                            Statement statement = con.createStatement();
+                            int result = statement.executeUpdate("DELETE FROM TASK WHERE ID = '" + task.taskID + "')");
+
+                            statement.close();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     }
                 })
                 .create();
@@ -206,8 +235,13 @@ public class ListActivity extends AppCompatActivity {
     }
 
     // TODO - go to map activity
-    public void onLocationClick(){
+    public void onLocationClick(final int position, Task task){
 
+        Intent intent = new Intent(getApplicationContext(), com.example.locationdo.MapsActivity.class);
+        intent.putExtra("latitude", task.strLat);
+        intent.putExtra("longitude", task.strLong);
+        intent.putExtra("title", task.strTitle);
+        startActivity(intent);
     }
 
     // custom data adapter to connect listview to arraylist & init each list item
@@ -243,6 +277,20 @@ public class ListActivity extends AppCompatActivity {
                 @Override
                 public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
                     toDoList.get(position).setCompletion(isChecked);
+
+                    try {
+                        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                        StrictMode.setThreadPolicy(policy);
+                        Class.forName("net.sourceforge.jtds.jdbc.Driver");
+                        Connection con = DriverManager.getConnection(DB_URL);
+
+                        Statement statement = con.createStatement();
+                        int result = statement.executeUpdate("UPDATE TASK SET STATUS = '" + (isChecked ? 1: 0) + " WHERE ID = '" + task.taskID + "')");
+
+                        statement.close();
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
 
@@ -256,7 +304,7 @@ public class ListActivity extends AppCompatActivity {
             btnLoc.setOnClickListener(new View.OnClickListener(){
                 @Override
                 public void onClick(View v){
-                    onLocationClick();
+                    onLocationClick(position, task);
                 }
             });
 
