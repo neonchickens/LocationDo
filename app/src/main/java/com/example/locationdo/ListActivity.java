@@ -196,7 +196,7 @@ public class ListActivity extends AppCompatActivity {
                             Connection con = DriverManager.getConnection(DB_URL);
 
                             Statement statement = con.createStatement();
-                            int result = statement.executeUpdate("UPDATE TASK SET name = '" + title + "', description = '" + desc + "' WHERE ID = '" + task.taskID + "')");
+                            int result = statement.executeUpdate("UPDATE TASK SET name = '" + title + "', description = '" + desc + "' WHERE ID = '" + task.taskID + "'");
 
                             statement.close();
                         } catch (Exception e) {
@@ -221,7 +221,10 @@ public class ListActivity extends AppCompatActivity {
                             Connection con = DriverManager.getConnection(DB_URL);
 
                             Statement statement = con.createStatement();
-                            int result = statement.executeUpdate("DELETE FROM TASK WHERE ID = '" + task.taskID + "')");
+                            int result = statement.executeUpdate("DELETE FROM USERTASK WHERE TASK_ID = '" + task.taskID + "'");
+
+                            statement = con.createStatement();
+                            result = statement.executeUpdate("DELETE FROM TASK WHERE ID = '" + task.taskID + "'");
 
                             statement.close();
                         } catch (Exception e) {
@@ -285,7 +288,7 @@ public class ListActivity extends AppCompatActivity {
                         Connection con = DriverManager.getConnection(DB_URL);
 
                         Statement statement = con.createStatement();
-                        int result = statement.executeUpdate("UPDATE TASK SET STATUS = '" + (isChecked ? 1: 0) + " WHERE ID = '" + task.taskID + "')");
+                        int result = statement.executeUpdate("UPDATE TASK SET STATUS = '" + (isChecked ? 1: 0) + " WHERE ID = '" + task.taskID + "'");
 
                         statement.close();
                     } catch (Exception e) {
