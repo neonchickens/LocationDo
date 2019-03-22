@@ -98,7 +98,7 @@ public class MapsSelector extends FragmentActivity implements GoogleMap.OnMyLoca
     @Override
     public void onMapLongClick(LatLng point) {
 
-        String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
+        String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
         try {
             StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();

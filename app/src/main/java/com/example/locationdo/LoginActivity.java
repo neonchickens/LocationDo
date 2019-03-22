@@ -25,7 +25,7 @@ import java.sql.Statement;
 public class LoginActivity extends AppCompatActivity {
     EditText username;
     EditText password;
-    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

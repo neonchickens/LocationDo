@@ -35,7 +35,7 @@ public class ListActivity extends AppCompatActivity {
     private static final String TAG = "ListActivity";
     ArrayList<Task> toDoList;
     TaskAdapter listAdapter;
-    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
+    private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
     private int id;
 
@@ -94,6 +94,7 @@ public class ListActivity extends AppCompatActivity {
                 Task newTask = new Task(resultat.getInt("id"), (resultat.getByte("status")!= 0),
                         resultat.getString("name"), resultat.getString("description"),
                         resultat.getString("latitude"), resultat.getString("longitude"));
+                Log.v(resultat.getString("name") + ": ", String.valueOf(resultat.getByte("status") != 0));
                 listAdapter.add(newTask);
                 Toast.makeText(this,"Loaded tasks from remote.", Toast.LENGTH_LONG);
             }
@@ -275,6 +276,8 @@ public class ListActivity extends AppCompatActivity {
             Button btnEdit = (Button)convertView.findViewById(R.id.btnEdit);
             ImageButton btnLoc = (ImageButton)convertView.findViewById(R.id.btnLocation);
 
+            chkBox.setChecked(task.boolStatus);
+
             // set button listeners
             chkBox.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
                 @Override
@@ -288,7 +291,7 @@ public class ListActivity extends AppCompatActivity {
                         Connection con = DriverManager.getConnection(DB_URL);
 
                         Statement statement = con.createStatement();
-                        int result = statement.executeUpdate("UPDATE TASK SET STATUS = '" + (isChecked ? 1: 0) + " WHERE ID = '" + task.taskID + "'");
+                        int result = statement.executeUpdate("UPDATE TASK SET STATUS = '" + (isChecked ? 1: 0) + "' WHERE ID = '" + task.taskID + "'");
 
                         statement.close();
                     } catch (Exception e) {
