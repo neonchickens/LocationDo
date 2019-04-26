@@ -25,6 +25,7 @@ import java.sql.Statement;
 public class LoginActivity extends AppCompatActivity {
     EditText username;
     EditText password;
+    int loginAttempts;
     private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
     @Override
@@ -33,6 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
         username = findViewById(R.id.enterUsername);
         password = findViewById(R.id.enterPassword);
+        loginAttempts = 0;
     }
 
     @Override
@@ -53,34 +55,43 @@ public class LoginActivity extends AppCompatActivity {
         String strPassword = SHA512(password.getText().toString());
 
         try {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+           StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+           StrictMode.setThreadPolicy(policy);
+           Class.forName("net.sourceforge.jtds.jdbc.Driver");
             Connection con = DriverManager.getConnection(DB_URL);
 
             Statement statement = con.createStatement();
             ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
 
-            while (resultat.next()) {
-                int id = resultat.getInt("id");
-                if (id != -1) {
-                    Toast.makeText(this,"Success", Toast.LENGTH_LONG);
-                    //TODO
-                    //Switch to list activity
-                    //Pass id for sql
+            if(resultat.next() != false && loginAttempts < 3){
+                    int id = resultat.getInt("id");
+                    if (id != 0) {
+                        Toast.makeText(this, "Success", Toast.LENGTH_LONG).show();
+                        //TODO
+                        //Switch to list activity
+                        //Pass id for sql
 
-                    Intent intent = new Intent(this, com.example.locationdo.ListActivity.class);
-                    intent.putExtra("id", id);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
-                }
-
+                        Intent intent = new Intent(this, com.example.locationdo.ListActivity.class);
+                        intent.putExtra("id", id);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show();
+                    }
+            }else if(loginAttempts >= 3){
+                Toast.makeText(this,"To many attempts, restart application.", Toast.LENGTH_LONG).show();
+                String num = Integer.toString(loginAttempts);
+                Log.w("Login Attempts", "Login attempt number: " + num);
+                loginAttempts++;
+            }
+            else{
+                Toast.makeText(this,"Incorrect Password or Username", Toast.LENGTH_LONG).show();
+                loginAttempts++;
             }
             resultat.close();
             statement.close();
         } catch (Exception e) {
             e.printStackTrace();
+
         }
 
     }
