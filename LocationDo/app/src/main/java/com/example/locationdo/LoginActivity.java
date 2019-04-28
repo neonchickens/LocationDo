@@ -1,14 +1,12 @@
 package com.example.locationdo;
 
 import android.content.Intent;
-import android.os.CountDownTimer;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.nio.charset.StandardCharsets;
@@ -27,7 +25,6 @@ import java.sql.Statement;
 public class LoginActivity extends AppCompatActivity {
     EditText username;
     EditText password;
-    TextView attemptTime;
     int loginAttempts;
     private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
 
@@ -37,8 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
         username = findViewById(R.id.enterUsername);
         password = findViewById(R.id.enterPassword);
-        attemptTime = findViewById(R.id.timer);
-
+        loginAttempts = 0;
     }
 
     @Override
@@ -67,7 +63,7 @@ public class LoginActivity extends AppCompatActivity {
             Statement statement = con.createStatement();
             ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
 
-            if(resultat.next() != false && attemptTime.getText() == ""){
+            if(resultat.next() != false && loginAttempts < 3){
                     int id = resultat.getInt("id");
                     if (id != 0) {
                         Toast.makeText(this, "Success", Toast.LENGTH_LONG).show();
@@ -81,21 +77,11 @@ public class LoginActivity extends AppCompatActivity {
                     } else {
                         Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show();
                     }
-            }else if(attemptTime.getText() != ""){
-                Toast.makeText(this,"Wait for current timer", Toast.LENGTH_LONG).show();
             }else if(loginAttempts >= 3){
-                Toast.makeText(this,"To many attempts, wait for timer.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this,"To many attempts, restart application.", Toast.LENGTH_LONG).show();
                 String num = Integer.toString(loginAttempts);
                 Log.w("Login Attempts", "Login attempt number: " + num);
                 loginAttempts++;
-                new CountDownTimer(30000, 1000){ public void onTick(long millisUntilFinished) {
-                    attemptTime.setText("seconds remaining: " + millisUntilFinished / 1000);
-                }
-
-                    public void onFinish() {
-                        attemptTime.setText("");
-                        loginAttempts = 0;
-                    }}.start();
             }
             else{
                 Toast.makeText(this,"Incorrect Password or Username", Toast.LENGTH_LONG).show();

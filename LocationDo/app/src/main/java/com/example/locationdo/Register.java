@@ -16,6 +16,7 @@ import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -28,6 +29,9 @@ public class Register extends AppCompatActivity {
     EditText username;
     EditText password;
     EditText conf;
+
+    private final String PASSWORD_REQUIREMENTS = "((?=.*[a-z])(?=.*\\d)(?=.*[A-Z])(?=.*[!@#$%]).{8,40})";
+
     private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
     public static final String USERNAME = "com.example.android.CIT268.extra.USERNAME";
     public static final String PASSWORD = "com.example.android.CIT268.extra.PASSWORD";
@@ -46,7 +50,9 @@ public class Register extends AppCompatActivity {
      * @param view
      */
     public void transition(View view) {
-
+        if(!checkPassword(password)){
+            return;
+        }
         String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());
         if(password.getText().toString().equals(conf.getText().toString())){
@@ -90,52 +96,22 @@ public class Register extends AppCompatActivity {
         }
     }
 
-    /**
-     * checks that password meets min requirements
+    /* checks that password meets minimum requirements
      * @param editText
      */
     private boolean checkPassword(EditText editText){
-        String pw;
-        boolean valid = false;
-        password = findViewById(R.id.enterPassword);
-        pw = password.getText().toString();
-        if(hasVariedChar(pw) && validLength(pw))
-            valid = true;
+        Pattern pattern = Pattern.compile(PASSWORD_REQUIREMENTS);
+        String pw = password.getText().toString();
 
-        return valid;
-    }
-    /**
-     * checks password meets character type requirements
-     * I can't get the pattern to match. I'm not sure if I'm using the wrong method or if my regex's are wrong. Should toast only when
-     * password  doesn't have a special character and a number
-     */
-    private boolean hasVariedChar(String str){
-        boolean valid = false;
-
-        if(Pattern.matches("\\d", str) && Pattern.matches("[^A-Za-z0-9]", str)) {
-            valid = true;
-        } else {
-            password.clearComposingText();
-            Toast toast = Toast.makeText(getApplicationContext(), "Password must include one number and a special character", Toast.LENGTH_LONG);
-            toast.show();
+        Matcher matcher = pattern.matcher(pw);
+        if(!matcher.matches()){
+            Toast.makeText(this,"Password must be: \n 8 characters long \n Contain 1 number \n " +
+                    "Contain 1 lower case letter \n Contain 1 upper case letter \n Contain one special character " +
+                    "(!@#$%)", Toast.LENGTH_LONG).show();
+            password.setText("");
         }
-        return valid;
-    }
 
-    /**
-     * checks that password is of sufficient length
-     * @param str
-     * @return
-     */
-    private boolean validLength(String str){
-        boolean valid = false;
+        return matcher.matches();
 
-        if(str.length() >= 8)
-            valid  = true;
-        else {
-            Toast toast = Toast.makeText(getApplicationContext(), "Password must be at least 8 characters", Toast.LENGTH_LONG);
-            toast.show();
-        }
-        return valid;
     }
 }
