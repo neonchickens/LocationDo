@@ -27,6 +27,7 @@ import android.widget.Toast;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
@@ -35,10 +36,6 @@ public class ListActivity extends AppCompatActivity {
     private static final String TAG = "ListActivity";
     ArrayList<Task> toDoList;
     TaskAdapter listAdapter;
-    private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
-
-    private int id;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,9 +46,9 @@ public class ListActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        id = intent.getIntExtra("id", -1);
+        Settings.getInstance().userid = intent.getIntExtra("id", -1);
 
-        if(id == -1){
+        if(Settings.getInstance().userid == -1){
             // TODO - send back to login
         }
 
@@ -77,29 +74,23 @@ public class ListActivity extends AppCompatActivity {
 
     public void loadTasks(){
         try {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            Connection con = DriverManager.getConnection(DB_URL);
+            String strStatement = "SELECT * FROM TASK JOIN USERTASK ON (TASK.ID = USERTASK.TASK_ID) WHERE USERTASK.ACCOUNT_ID = ?";
+            //Settings.getInstance().userid
+            PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
+            psSelect.setInt(1, Settings.getInstance().userid);
+            psSelect.execute();
 
-            Statement statement = con.createStatement();
-
-            ResultSet resultat = statement.executeQuery(
-                        "SELECT * " +
-                            "FROM TASK " +
-                            "JOIN USERTASK ON (TASK.ID = USERTASK.TASK_ID)" +
-                                "WHERE USERTASK.ACCOUNT_ID =" + id);
-
-            while (resultat.next()) {
-                Task newTask = new Task(resultat.getInt("id"), (resultat.getByte("status")!= 0),
-                        resultat.getString("name"), resultat.getString("description"),
-                        resultat.getString("latitude"), resultat.getString("longitude"));
-                Log.v(resultat.getString("name") + ": ", String.valueOf(resultat.getByte("status") != 0));
+            //Get sql results
+            ResultSet rsSelect = psSelect.getResultSet();
+            while (rsSelect.next()) {
+                Task newTask = new Task(rsSelect.getInt("id"), (rsSelect.getByte("status")!= 0),
+                        rsSelect.getString("name"), rsSelect.getString("description"),
+                        rsSelect.getString("latitude"), rsSelect.getString("longitude"));
+                Log.v(rsSelect.getString("name") + ": ", String.valueOf(rsSelect.getByte("status") != 0));
                 listAdapter.add(newTask);
                 Toast.makeText(this,"Loaded tasks from remote.", Toast.LENGTH_LONG);
             }
-            resultat.close();
-            statement.close();
+            rsSelect.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -144,7 +135,7 @@ public class ListActivity extends AppCompatActivity {
                         Intent intent = new Intent(getApplicationContext(), com.example.locationdo.MapsSelector.class);
                         intent.putExtra("title", title);
                         intent.putExtra("desc", desc);
-                        intent.putExtra("id", id);
+                        intent.putExtra("id", Settings.getInstance().userid );
                         startActivity(intent);
 
                     }
@@ -191,15 +182,16 @@ public class ListActivity extends AppCompatActivity {
                         // TODO - update remote server task
 
                         try {
-                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                            StrictMode.setThreadPolicy(policy);
-                            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-                            Connection con = DriverManager.getConnection(DB_URL);
-
-                            Statement statement = con.createStatement();
-                            int result = statement.executeUpdate("UPDATE TASK SET name = '" + title + "', description = '" + desc + "' WHERE ID = '" + task.taskID + "'");
-
-                            statement.close();
+                            String strStatement = "UPDATE TASK SET name = ?, description = ? WHERE ID = ?";
+                            PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
+                            psSelect.setString(1, title);
+                            psSelect.setString(2, desc);
+                            psSelect.setInt(3, task.taskID);
+                            int result = psSelect.executeUpdate();
+                            if (result != 1) {
+                                Log.d(TAG, "onClick: Error updating task");
+                            }
+                            psSelect.close();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -216,18 +208,24 @@ public class ListActivity extends AppCompatActivity {
                         // TODO - delete remote server task
 
                         try {
-                            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                            StrictMode.setThreadPolicy(policy);
-                            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-                            Connection con = DriverManager.getConnection(DB_URL);
+                            String strStatement = "DELETE FROM USERTASK WHERE TASK_ID = ?";
+                            PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
+                            psSelect.setInt(1, task.taskID);
+                            int result = psSelect.executeUpdate();
+                            if (result != 1) {
+                                Log.d(TAG, "onClick: Error deleting task from usertask table");
+                            }
+                            psSelect.close();
 
-                            Statement statement = con.createStatement();
-                            int result = statement.executeUpdate("DELETE FROM USERTASK WHERE TASK_ID = '" + task.taskID + "'");
+                            strStatement = "DELETE FROM TASK WHERE ID = ?";
+                            psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
+                            psSelect.setInt(1, task.taskID);
+                            result = psSelect.executeUpdate();
+                            if (result != 1) {
+                                Log.d(TAG, "onClick: Error deleting task from task table");
+                            }
+                            psSelect.close();
 
-                            statement = con.createStatement();
-                            result = statement.executeUpdate("DELETE FROM TASK WHERE ID = '" + task.taskID + "'");
-
-                            statement.close();
                         } catch (Exception e) {
                             e.printStackTrace();
                         }
@@ -285,14 +283,17 @@ public class ListActivity extends AppCompatActivity {
                     toDoList.get(position).setCompletion(isChecked);
 
                     try {
-                        StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                        StrictMode.setThreadPolicy(policy);
-                        Class.forName("net.sourceforge.jtds.jdbc.Driver");
-                        Connection con = DriverManager.getConnection(DB_URL);
-
+                        Connection con = Settings.getInstance().getConnection();
                         Statement statement = con.createStatement();
-                        int result = statement.executeUpdate("UPDATE TASK SET STATUS = '" + (isChecked ? 1: 0) + "' WHERE ID = '" + task.taskID + "'");
 
+                        String strStatement = "UPDATE TASK SET STATUS = ? WHERE ID = ?";
+                        PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
+                        psSelect.setBoolean(1, isChecked);
+                        psSelect.setInt(2, task.taskID);
+                        int result = psSelect.executeUpdate();
+                        if (result != 1) {
+                            Log.d(TAG, "onCheckedChanged: Error. Failed to change checkbox.");
+                        }
                         statement.close();
                     } catch (Exception e) {
                         e.printStackTrace();

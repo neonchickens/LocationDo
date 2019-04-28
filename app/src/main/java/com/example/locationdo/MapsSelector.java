@@ -21,6 +21,7 @@ import com.google.android.gms.maps.model.MarkerOptions;
 
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -98,31 +99,31 @@ public class MapsSelector extends FragmentActivity implements GoogleMap.OnMyLoca
     @Override
     public void onMapLongClick(LatLng point) {
 
-        String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
-
         try {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            Connection con = DriverManager.getConnection(DB_URL);
-
-            Statement statement = con.createStatement();
-            int result = statement.executeUpdate("INSERT INTO TASK (name, description, status, latitude, longitude) " +
-                    "VALUES ('" + title + "', '" + desc + "', '0', '" + point.latitude + "', '" + point.longitude + "')", Statement.RETURN_GENERATED_KEYS);
-
+            String strStatement = "INSERT INTO TASK (name, description, status, latitude, longitude) VALUES (?, ?, 0, ?, ?)";//, Statement.RETURN_GENERATED_KEYS);
+            PreparedStatement psUpdate = Settings.getInstance().getConnection().prepareStatement(strStatement);
+            psUpdate.setString(1, title);
+            psUpdate.setString(2, desc);
+            psUpdate.setDouble(3, point.latitude);
+            psUpdate.setDouble(4, point.longitude);
+            int result = psUpdate.executeUpdate();
             if (result == 1) {
-                ResultSet rs = statement.getGeneratedKeys();
+                ResultSet rs = psUpdate.getGeneratedKeys();
                 while (rs.next()) {
                     int taskid = rs.getInt("id");
-                    int result2 = statement.executeUpdate("INSERT INTO USERTASK (account_id, task_id) " +
-                            "VALUES ('" + id + "', '" + taskid + "')");
+                    String strStatement2 = "INSERT INTO USERTASK (account_id, task_id) VALUES (?, ?)";
+                    PreparedStatement psUpdate2 = Settings.getInstance().getConnection().prepareStatement(strStatement);
+                    psUpdate2.setInt(1, id);
+                    psUpdate2.setInt(2, taskid);
+                    int result2 = psUpdate2.executeUpdate();
                     if (result2 == 1) {
-                    }
 
+                    }
+                    psUpdate2.close();
                 }
             }
 
-            statement.close();
+            psUpdate.close();
 
             Intent intent = new Intent(getApplicationContext(), com.example.locationdo.ListActivity.class);
             intent.putExtra("id", id);

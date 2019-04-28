@@ -13,6 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.regex.Pattern;
 
@@ -26,7 +27,6 @@ public class Modify extends AppCompatActivity {
     EditText username;
     EditText password;
 
-    private static final String DB_URL = "jdbc:jtds:sqlserver://34.201.242.17:1433/LocationDo;user=LocationDo;password=CitSsd!";
     public static final String USERNAME = "com.example.android.CIT268.extra.USERNAME";
     public static final String PASSWORD = "com.example.android.CIT268.extra.PASSWORD";
 
@@ -50,21 +50,18 @@ public class Modify extends AppCompatActivity {
         String strPassword = SHA512(password.getText().toString());
 
         try {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            Connection con = DriverManager.getConnection(DB_URL);
-
-            Statement statement = con.createStatement();
-            int result = statement.executeUpdate("UPDATE ACCOUNT SET password = '" + strPassword + "' WHERE id = '" + id +"'");
-
+            String strStatement = "UPDATE ACCOUNT SET password = ? WHERE id = ?";
+            PreparedStatement psUpdate = Settings.getInstance().getConnection().prepareStatement(strStatement);
+            psUpdate.setString(1, strPassword);
+            psUpdate.setInt(2, id);
+            int result = psUpdate.executeUpdate();
             if (result == 1) {
                 Intent returnIntent = new Intent();
                 setResult(RESULT_OK, returnIntent);
                 finish();
             }
 
-            statement.close();
+            psUpdate.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
