@@ -27,7 +27,7 @@ import java.util.regex.Pattern;
 public class Register extends AppCompatActivity {
     EditText username;
     EditText password;
-
+    EditText conf;
     private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
     public static final String USERNAME = "com.example.android.CIT268.extra.USERNAME";
     public static final String PASSWORD = "com.example.android.CIT268.extra.PASSWORD";
@@ -38,6 +38,7 @@ public class Register extends AppCompatActivity {
         setContentView(R.layout.activity_register);
         username = findViewById(R.id.enterUsername);
         password = findViewById(R.id.enterPassword);
+        conf = findViewById(R.id.confPassword);
     }
 
     /**
@@ -48,28 +49,30 @@ public class Register extends AppCompatActivity {
 
         String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());
+        if(password.getText().toString().equals(conf.getText().toString())){
+            try {
+                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+                StrictMode.setThreadPolicy(policy);
+                Class.forName("net.sourceforge.jtds.jdbc.Driver");
+                Connection con = DriverManager.getConnection(DB_URL);
 
-        try {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            Connection con = DriverManager.getConnection(DB_URL);
+                Statement statement = con.createStatement();
+                int result = statement.executeUpdate("INSERT INTO ACCOUNT (username, password) VALUES ('" + strUsername + "', '" + strPassword + "')");
 
-            Statement statement = con.createStatement();
-            int result = statement.executeUpdate("INSERT INTO ACCOUNT (username, password) VALUES ('" + strUsername + "', '" + strPassword + "')");
+                if (result == 1) {
+                    Intent returnIntent = new Intent();
+                    returnIntent.putExtra(USERNAME, strUsername);
+                    setResult(RESULT_OK, returnIntent);
+                    finish();
+                }
 
-            if (result == 1) {
-                Intent returnIntent = new Intent();
-                returnIntent.putExtra(USERNAME, strUsername);
-                setResult(RESULT_OK, returnIntent);
-                finish();
+                statement.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            statement.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        }else{
+            Toast.makeText(this,"Passwords do not match", Toast.LENGTH_LONG).show();
         }
-
     }
 
     private static String SHA512(String strPassword) {
