@@ -31,8 +31,6 @@ public class LoginActivity extends AppCompatActivity {
   
     TextView attemptTime;
     int loginAttempts;
-    private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
-  
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -91,7 +89,7 @@ public class LoginActivity extends AppCompatActivity {
                 String num = Integer.toString(loginAttempts);
                 Log.w("Login Attempts", "Login attempt number: " + num);
                 loginAttempts++;
-                new CountDownTimer(30000, 1000){ public void onTick(long millisUntilFinished) {
+                new CountDownTimer(1000 * 60 * 3, 1000){ public void onTick(long millisUntilFinished) {
                     attemptTime.setText("seconds remaining: " + millisUntilFinished / 1000);
                 }
 

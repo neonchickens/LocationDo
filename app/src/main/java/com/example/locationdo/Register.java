@@ -70,8 +70,9 @@ public class Register extends AppCompatActivity {
           } catch (Exception e) {
               e.printStackTrace();
               Toast.makeText(this, "Username already taken.", Toast.LENGTH_SHORT).show();
-          } else {
-            Toast.makeText(this,"Passwords do not match", Toast.LENGTH_LONG).show();
+          }
+        } else {
+            Toast.makeText(this, "Passwords do not match", Toast.LENGTH_LONG).show();
         }
     }
 
