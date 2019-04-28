@@ -50,7 +50,9 @@ public class Register extends AppCompatActivity {
      * @param view
      */
     public void transition(View view) {
-
+        if(!checkPassword(password)){
+            return;
+        }
         String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());
         if(password.getText().toString().equals(conf.getText().toString())){
