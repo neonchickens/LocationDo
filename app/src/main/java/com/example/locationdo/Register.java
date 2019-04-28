@@ -95,7 +95,7 @@ public class Register extends AppCompatActivity {
      * checks that password meets min requirements
      * @param editText
      */
-    private boolean checkPassword(EditText editText){
+    public boolean checkPassword(EditText editText){
         String pw;
         boolean valid = false;
         password = findViewById(R.id.enterPassword);
