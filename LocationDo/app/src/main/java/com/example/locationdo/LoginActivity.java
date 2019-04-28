@@ -1,14 +1,12 @@
 package com.example.locationdo;
 
 import android.content.Intent;
-import android.os.CountDownTimer;
 import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.nio.charset.StandardCharsets;
@@ -16,7 +14,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -28,11 +25,8 @@ import java.sql.Statement;
 public class LoginActivity extends AppCompatActivity {
     EditText username;
     EditText password;
-  
-    TextView attemptTime;
     int loginAttempts;
     private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
-  
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,8 +34,7 @@ public class LoginActivity extends AppCompatActivity {
         setContentView(R.layout.activity_log_in);
         username = findViewById(R.id.enterUsername);
         password = findViewById(R.id.enterPassword);
-        attemptTime = findViewById(R.id.timer);
-
+        loginAttempts = 0;
     }
 
     @Override
@@ -62,50 +55,40 @@ public class LoginActivity extends AppCompatActivity {
         String strPassword = SHA512(password.getText().toString());
 
         try {
-            String strStatement = "SELECT ID FROM ACCOUNT WHERE USERNAME = ? and PASSWORD = ?";
-            PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
-            psSelect.setString(1, strUsername);
-            psSelect.setString(2, strPassword);
-            psSelect.execute();
+           StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+           StrictMode.setThreadPolicy(policy);
+           Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            Connection con = DriverManager.getConnection(DB_URL);
 
-            //Get sql results
-            ResultSet rsSelect = psSelect.getResultSet();
-            if (rsSelect.next() && attemptTime.getText().equals("")) {
-                int id = rsSelect.getInt("id");
-                if (id != -1) {
-                    Toast.makeText(this,"Success", Toast.LENGTH_LONG);
-                    //TODO
-                    //Switch to list activity
-                    //Pass id for sql
+            Statement statement = con.createStatement();
+            ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
 
-                    Intent intent = new Intent(this, com.example.locationdo.ListActivity.class);
-                    intent.putExtra("id", id);
-                    startActivity(intent);
-                } else {
-                    Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
-                }
-            }else if(!attemptTime.getText().equals("")){
-                Toast.makeText(this,"Wait for current timer", Toast.LENGTH_LONG).show();
+            if(resultat.next() != false && loginAttempts < 3){
+                    int id = resultat.getInt("id");
+                    if (id != 0) {
+                        Toast.makeText(this, "Success", Toast.LENGTH_LONG).show();
+                        //TODO
+                        //Switch to list activity
+                        //Pass id for sql
+
+                        Intent intent = new Intent(this, com.example.locationdo.ListActivity.class);
+                        intent.putExtra("id", id);
+                        startActivity(intent);
+                    } else {
+                        Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show();
+                    }
             }else if(loginAttempts >= 3){
-                Toast.makeText(this,"To many attempts, wait for timer.", Toast.LENGTH_LONG).show();
+                Toast.makeText(this,"To many attempts, restart application.", Toast.LENGTH_LONG).show();
                 String num = Integer.toString(loginAttempts);
                 Log.w("Login Attempts", "Login attempt number: " + num);
                 loginAttempts++;
-                new CountDownTimer(30000, 1000){ public void onTick(long millisUntilFinished) {
-                    attemptTime.setText("seconds remaining: " + millisUntilFinished / 1000);
-                }
-
-                    public void onFinish() {
-                        attemptTime.setText("");
-                        loginAttempts = 0;
-                    }}.start();
             }
             else{
                 Toast.makeText(this,"Incorrect Password or Username", Toast.LENGTH_LONG).show();
                 loginAttempts++;
             }
-
-            rsSelect.close();
+            resultat.close();
+            statement.close();
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -157,16 +140,16 @@ public class LoginActivity extends AppCompatActivity {
         String strPassword = SHA512(password.getText().toString());
 
         try {
-            String strStatement = "SELECT ID FROM ACCOUNT WHERE USERNAME = ? and PASSWORD = ?";
-            PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
-            psSelect.setString(1, strUsername);
-            psSelect.setString(2, strPassword);
-            psSelect.execute();
+            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
+            StrictMode.setThreadPolicy(policy);
+            Class.forName("net.sourceforge.jtds.jdbc.Driver");
+            Connection con = DriverManager.getConnection(DB_URL);
 
-            //Get sql results
-            ResultSet rsSelect = psSelect.getResultSet();
-            while (rsSelect.next()) {
-                int id = rsSelect.getInt("id");
+            Statement statement = con.createStatement();
+            ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
+
+            while (resultat.next()) {
+                int id = resultat.getInt("id");
                 if (id != -1) {
                     Toast.makeText(this,"Success", Toast.LENGTH_LONG);
                     //TODO
@@ -181,7 +164,8 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
             }
-            rsSelect.close();
+            resultat.close();
+            statement.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
