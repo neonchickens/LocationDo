@@ -36,11 +36,11 @@ public class PasswordTests {
 
         EditText et = new EditText(appContext);
 
-        // check acceptable password
+        // Test 1 - check acceptable password
         et.setText("password1");
         assertTrue(testRegister.checkPassword(et));
 
-        // check too-short password
+        // Test 2 - check too-short password
         et.setText("pass1");
         assertFalse(testRegister.checkPassword(et));
     }

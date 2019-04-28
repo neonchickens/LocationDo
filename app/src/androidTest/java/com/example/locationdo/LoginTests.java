@@ -38,12 +38,14 @@ public class LoginTests {
         testLogin.username.setText("bob");
         testLogin.password.setText("failtest");
 
+        // Test 3 - Check initial login state
         assertTrue(!testLogin.attemptTime.getText().equals(""));
         assertEquals(testLogin.loginAttempts, 0);
 
         testLogin.transition();
         testLogin.transition();
 
+        // Test 4 - Check that timeout is set after 3 failed attempts
         assertEquals(testLogin.loginAttempts, 3);
         assertFalse(!testLogin.attemptTime.getText().equals(""));
     }
