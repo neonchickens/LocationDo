@@ -14,6 +14,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.regex.Pattern;
@@ -27,8 +28,9 @@ import java.util.regex.Pattern;
 public class Register extends AppCompatActivity {
     EditText username;
     EditText password;
+  
     EditText conf;
-    private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
+  
     public static final String USERNAME = "com.example.android.CIT268.extra.USERNAME";
     public static final String PASSWORD = "com.example.android.CIT268.extra.PASSWORD";
 
@@ -49,28 +51,26 @@ public class Register extends AppCompatActivity {
 
         String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());
+
         if(password.getText().toString().equals(conf.getText().toString())){
-            try {
-                StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-                StrictMode.setThreadPolicy(policy);
-                Class.forName("net.sourceforge.jtds.jdbc.Driver");
-                Connection con = DriverManager.getConnection(DB_URL);
+          try {
+              String strStatement = "INSERT INTO ACCOUNT (username, password) VALUES (?, ?)";
+              PreparedStatement psInsert = Settings.getInstance().getConnection().prepareStatement(strStatement);
+              psInsert.setString(1, strUsername);
+              psInsert.setString(2, strPassword);
+              int result = psInsert.executeUpdate();
+              if (result == 1) {
+                  Intent returnIntent = new Intent();
+                  returnIntent.putExtra(USERNAME, strUsername);
+                  setResult(RESULT_OK, returnIntent);
+                  finish();
+              }
 
-                Statement statement = con.createStatement();
-                int result = statement.executeUpdate("INSERT INTO ACCOUNT (username, password) VALUES ('" + strUsername + "', '" + strPassword + "')");
-
-                if (result == 1) {
-                    Intent returnIntent = new Intent();
-                    returnIntent.putExtra(USERNAME, strUsername);
-                    setResult(RESULT_OK, returnIntent);
-                    finish();
-                }
-
-                statement.close();
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        }else{
+              psInsert.close();
+          } catch (Exception e) {
+              e.printStackTrace();
+              Toast.makeText(this, "Username already taken.", Toast.LENGTH_SHORT).show();
+          } else {
             Toast.makeText(this,"Passwords do not match", Toast.LENGTH_LONG).show();
         }
     }

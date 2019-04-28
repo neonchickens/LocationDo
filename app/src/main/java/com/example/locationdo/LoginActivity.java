@@ -16,6 +16,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.sql.Connection;
 import java.sql.DriverManager;
+import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 
@@ -27,9 +28,11 @@ import java.sql.Statement;
 public class LoginActivity extends AppCompatActivity {
     EditText username;
     EditText password;
+  
     TextView attemptTime;
     int loginAttempts;
     private static final String DB_URL = "jdbc:jtds:sqlserver://3.87.197.166:1433/LocationDo;user=LocationDo;password=CitSsd!";
+  
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -59,29 +62,29 @@ public class LoginActivity extends AppCompatActivity {
         String strPassword = SHA512(password.getText().toString());
 
         try {
-           StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-           StrictMode.setThreadPolicy(policy);
-           Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            Connection con = DriverManager.getConnection(DB_URL);
+            String strStatement = "SELECT ID FROM ACCOUNT WHERE USERNAME = ? and PASSWORD = ?";
+            PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
+            psSelect.setString(1, strUsername);
+            psSelect.setString(2, strPassword);
+            psSelect.execute();
 
-            Statement statement = con.createStatement();
-            ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
+            //Get sql results
+            ResultSet rsSelect = psSelect.getResultSet();
+            if (rsSelect.next() && attemptTime.getText().equals("")) {
+                int id = rsSelect.getInt("id");
+                if (id != -1) {
+                    Toast.makeText(this,"Success", Toast.LENGTH_LONG);
+                    //TODO
+                    //Switch to list activity
+                    //Pass id for sql
 
-            if(resultat.next() != false && attemptTime.getText() == ""){
-                    int id = resultat.getInt("id");
-                    if (id != 0) {
-                        Toast.makeText(this, "Success", Toast.LENGTH_LONG).show();
-                        //TODO
-                        //Switch to list activity
-                        //Pass id for sql
-
-                        Intent intent = new Intent(this, com.example.locationdo.ListActivity.class);
-                        intent.putExtra("id", id);
-                        startActivity(intent);
-                    } else {
-                        Toast.makeText(this, "Failure", Toast.LENGTH_LONG).show();
-                    }
-            }else if(attemptTime.getText() != ""){
+                    Intent intent = new Intent(this, com.example.locationdo.ListActivity.class);
+                    intent.putExtra("id", id);
+                    startActivity(intent);
+                } else {
+                    Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
+                }
+            }else if(!attemptTime.getText().equals("")){
                 Toast.makeText(this,"Wait for current timer", Toast.LENGTH_LONG).show();
             }else if(loginAttempts >= 3){
                 Toast.makeText(this,"To many attempts, wait for timer.", Toast.LENGTH_LONG).show();
@@ -101,8 +104,8 @@ public class LoginActivity extends AppCompatActivity {
                 Toast.makeText(this,"Incorrect Password or Username", Toast.LENGTH_LONG).show();
                 loginAttempts++;
             }
-            resultat.close();
-            statement.close();
+
+            rsSelect.close();
         } catch (Exception e) {
             e.printStackTrace();
 
@@ -154,16 +157,16 @@ public class LoginActivity extends AppCompatActivity {
         String strPassword = SHA512(password.getText().toString());
 
         try {
-            StrictMode.ThreadPolicy policy = new StrictMode.ThreadPolicy.Builder().permitAll().build();
-            StrictMode.setThreadPolicy(policy);
-            Class.forName("net.sourceforge.jtds.jdbc.Driver");
-            Connection con = DriverManager.getConnection(DB_URL);
+            String strStatement = "SELECT ID FROM ACCOUNT WHERE USERNAME = ? and PASSWORD = ?";
+            PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
+            psSelect.setString(1, strUsername);
+            psSelect.setString(2, strPassword);
+            psSelect.execute();
 
-            Statement statement = con.createStatement();
-            ResultSet resultat = statement.executeQuery("SELECT ID FROM ACCOUNT WHERE USERNAME = '" + strUsername + "' and PASSWORD = '" + strPassword + "'");
-
-            while (resultat.next()) {
-                int id = resultat.getInt("id");
+            //Get sql results
+            ResultSet rsSelect = psSelect.getResultSet();
+            while (rsSelect.next()) {
+                int id = rsSelect.getInt("id");
                 if (id != -1) {
                     Toast.makeText(this,"Success", Toast.LENGTH_LONG);
                     //TODO
@@ -178,8 +181,7 @@ public class LoginActivity extends AppCompatActivity {
                 }
 
             }
-            resultat.close();
-            statement.close();
+            rsSelect.close();
         } catch (Exception e) {
             e.printStackTrace();
         }
