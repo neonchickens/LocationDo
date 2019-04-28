@@ -44,12 +44,12 @@ public class ListActivity extends AppCompatActivity {
         Toolbar toolbar = findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
+        //Retrieve user id
         Intent intent = getIntent();
-
         Settings.getInstance().userid = intent.getIntExtra("id", -1);
-
         if(Settings.getInstance().userid == -1){
-            // TODO - send back to login
+            Intent returnintent = new Intent(this, com.example.locationdo.LoginActivity.class);
+            startActivity(returnintent);
         }
 
         FloatingActionButton fab = findViewById(R.id.fab);
@@ -60,13 +60,11 @@ public class ListActivity extends AppCompatActivity {
             }
         });
 
+        //Populate list with database retrieved tasks
         toDoList = new ArrayList<Task>();
         listAdapter = new TaskAdapter(this, toDoList);
-
         ListView listView = (ListView) findViewById(R.id.list_view);
         listView.setAdapter(listAdapter);
-
-        // TODO - populate array list from remote server
         loadTasks();
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
@@ -74,8 +72,8 @@ public class ListActivity extends AppCompatActivity {
 
     public void loadTasks(){
         try {
+            //Retrieve list from database
             String strStatement = "SELECT * FROM TASK JOIN USERTASK ON (TASK.ID = USERTASK.TASK_ID) WHERE USERTASK.ACCOUNT_ID = ?";
-            //Settings.getInstance().userid
             PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
             psSelect.setInt(1, Settings.getInstance().userid);
             psSelect.execute();
@@ -83,6 +81,7 @@ public class ListActivity extends AppCompatActivity {
             //Get sql results
             ResultSet rsSelect = psSelect.getResultSet();
             while (rsSelect.next()) {
+                //Load task into layout
                 Task newTask = new Task(rsSelect.getInt("id"), (rsSelect.getByte("status")!= 0),
                         rsSelect.getString("name"), rsSelect.getString("description"),
                         rsSelect.getString("latitude"), rsSelect.getString("longitude"));
@@ -124,9 +123,6 @@ public class ListActivity extends AppCompatActivity {
                         Log.d(TAG, "Task to add: " + title);
 
                         String desc = String.valueOf(descEditText.getText());
-
-                        // TODO - try to get and set lat&long
-                        float latitude = 0, longitutde = 0;
 
                         // create task object to save
                         Task newTask = new Task(title, desc);
@@ -179,7 +175,6 @@ public class ListActivity extends AppCompatActivity {
                         // create task object to save
                         Task newTask = new Task(title, desc);
                         toDoList.set(position, newTask);
-                        // TODO - update remote server task
 
                         try {
                             String strStatement = "UPDATE TASK SET name = ?, description = ? WHERE ID = ?";
@@ -205,9 +200,10 @@ public class ListActivity extends AppCompatActivity {
                     public void onClick(DialogInterface dialog, int which) {
                         toDoList.remove(position);
                         listAdapter.notifyDataSetChanged();
-                        // TODO - delete remote server task
 
                         try {
+                            //delete from both tables to maintain relationship
+
                             String strStatement = "DELETE FROM USERTASK WHERE TASK_ID = ?";
                             PreparedStatement psSelect = Settings.getInstance().getConnection().prepareStatement(strStatement);
                             psSelect.setInt(1, task.taskID);
@@ -236,7 +232,6 @@ public class ListActivity extends AppCompatActivity {
 
     }
 
-    // TODO - go to map activity
     public void onLocationClick(final int position, Task task){
 
         Intent intent = new Intent(getApplicationContext(), com.example.locationdo.MapsActivity.class);
