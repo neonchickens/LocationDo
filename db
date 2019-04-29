@@ -1,0 +1,75 @@
+USE [LocationDo]
+GO
+/****** Object:  Table [dbo].[Account]    Script Date: 4/28/2019 9:54:43 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Account](
+	[id] [numeric](4, 0) IDENTITY(1,1) NOT FOR REPLICATION NOT NULL,
+	[username] [nchar](32) NOT NULL,
+	[password] [nchar](512) NOT NULL,
+ CONSTRAINT [PK_Account] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Log]    Script Date: 4/28/2019 9:54:45 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Log](
+	[logid] [int] IDENTITY(1,1) NOT NULL,
+	[accountid] [int] NOT NULL,
+	[timestamp] [timestamp] NOT NULL,
+	[deviceid] [nchar](16) NOT NULL,
+ CONSTRAINT [PK_Log] PRIMARY KEY CLUSTERED 
+(
+	[logid] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[Task]    Script Date: 4/28/2019 9:54:45 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[Task](
+	[id] [numeric](4, 0) IDENTITY(1,1) NOT NULL,
+	[name] [nchar](16) NOT NULL,
+	[description] [nchar](256) NULL,
+	[status] [bit] NOT NULL,
+	[latitude] [numeric](10, 6) NOT NULL,
+	[longitude] [numeric](10, 6) NOT NULL,
+ CONSTRAINT [PK_Task] PRIMARY KEY CLUSTERED 
+(
+	[id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+/****** Object:  Table [dbo].[UserTask]    Script Date: 4/28/2019 9:54:45 PM ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+CREATE TABLE [dbo].[UserTask](
+	[account_id] [numeric](4, 0) NOT NULL,
+	[task_id] [numeric](4, 0) NOT NULL,
+ CONSTRAINT [PK_UserTask] PRIMARY KEY CLUSTERED 
+(
+	[task_id] ASC
+)WITH (PAD_INDEX = OFF, STATISTICS_NORECOMPUTE = OFF, IGNORE_DUP_KEY = OFF, ALLOW_ROW_LOCKS = ON, ALLOW_PAGE_LOCKS = ON) ON [PRIMARY]
+) ON [PRIMARY]
+GO
+ALTER TABLE [dbo].[UserTask]  WITH CHECK ADD  CONSTRAINT [FK_UserTask_Account] FOREIGN KEY([account_id])
+REFERENCES [dbo].[Account] ([id])
+GO
+ALTER TABLE [dbo].[UserTask] CHECK CONSTRAINT [FK_UserTask_Account]
+GO
+ALTER TABLE [dbo].[UserTask]  WITH CHECK ADD  CONSTRAINT [FK_UserTask_Task] FOREIGN KEY([task_id])
+REFERENCES [dbo].[Task] ([id])
+GO
+ALTER TABLE [dbo].[UserTask] CHECK CONSTRAINT [FK_UserTask_Task]
+GO

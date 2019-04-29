@@ -1,10 +1,16 @@
 package com.example.locationdo;
 
+import android.Manifest;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.os.CountDownTimer;
 import android.os.StrictMode;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
@@ -19,6 +25,9 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+import java.sql.Timestamp;
+
+import static android.provider.Settings.Secure.ANDROID_ID;
 
 /**
  * Names: Jonas, Weston, Grant, Mike
@@ -85,12 +94,17 @@ public class LoginActivity extends AppCompatActivity {
             if (rsSelect.next() && attemptTime.getText().equals("")) {
                 int id = rsSelect.getInt("id");
                 if (id != -1) {
-                    Toast.makeText(this,"Success", Toast.LENGTH_LONG);
+                    //Log log in attempt
+                    strStatement = "INSERT INTO LOG (accountid, deviceid) VALUES (?, ?)";
+                    PreparedStatement psInsert = Settings.getInstance().getConnection().prepareStatement(strStatement);
+                    psInsert.setInt(1, id);
+                    psInsert.setString(2, android.provider.Settings.Secure.getString(this.getContentResolver(), ANDROID_ID));
+                    psInsert.executeUpdate();
+
+                    //Switch to list activity
                     Intent intent = new Intent(this, com.example.locationdo.ListActivity.class);
                     intent.putExtra("id", id);
                     startActivity(intent);
-                } else {
-                    Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
                 }
             } else if(!attemptTime.getText().equals("")){
                 //Preventing the user from resetting the timer
@@ -129,6 +143,7 @@ public class LoginActivity extends AppCompatActivity {
      */
     private static String SHA512(String strPassword) {
         try {
+            //Hashes password using secure SHA512
             MessageDigest md = MessageDigest.getInstance("SHA-512");
             byte[] digest = md.digest(strPassword.getBytes(StandardCharsets.UTF_8));
             char[] hex = new char[digest.length * 2];
@@ -187,7 +202,6 @@ public class LoginActivity extends AppCompatActivity {
             if (rsSelect.next() && attemptTime.getText().equals("")) {
                 int id = rsSelect.getInt("id");
                 if (id != -1) {
-                    Toast.makeText(this,"Success", Toast.LENGTH_LONG);
                     Intent intent = new Intent(this, com.example.locationdo.Modify.class);
                     intent.putExtra("id", id);
                     startActivity(intent);
