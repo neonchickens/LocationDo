@@ -1,10 +1,8 @@
 package com.example.locationdo;
 
 import android.content.Intent;
-import android.os.StrictMode;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.Toast;
@@ -12,12 +10,7 @@ import android.widget.Toast;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Statement;
-import java.util.regex.Pattern;
 
 /**
  * This is the Registration Activity for the LocationDo app
@@ -52,7 +45,7 @@ public class Register extends AppCompatActivity {
         String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());
 
-        if(password.getText().toString().equals(conf.getText().toString())){
+        if(checkPassword(password.getText().toString()) && password.getText().toString().equals(conf.getText().toString())){
           try {
               String strStatement = "INSERT INTO ACCOUNT (username, password) VALUES (?, ?)";
               PreparedStatement psInsert = Settings.getInstance().getConnection().prepareStatement(strStatement);
@@ -93,27 +86,24 @@ public class Register extends AppCompatActivity {
 
     /**
      * checks that password meets min requirements
-     * @param editText
+     * @param strpw
      */
-    public boolean checkPassword(EditText editText){
-        String pw;
+    public boolean checkPassword(String strpw){
         boolean valid = false;
-        password = findViewById(R.id.enterPassword);
-        pw = password.getText().toString();
-        if(hasVariedChar(pw) && validLength(pw))
+        if(hasVariedChar(strpw) && validLength(strpw))
             valid = true;
 
         return valid;
     }
     /**
      * checks password meets character type requirements
-     * I can't get the pattern to match. I'm not sure if I'm using the wrong method or if my regex's are wrong. Should toast only when
+     * Should toast only when
      * password  doesn't have a special character and a number
      */
     private boolean hasVariedChar(String str){
         boolean valid = false;
 
-        if(Pattern.matches("\\d", str) && Pattern.matches("[^A-Za-z0-9]", str)) {
+        if(str.matches("^.*\\d.*$") && str.matches("^.*\\W.*$")) {
             valid = true;
         } else {
             password.clearComposingText();
