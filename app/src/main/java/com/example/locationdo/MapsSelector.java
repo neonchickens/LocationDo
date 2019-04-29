@@ -24,6 +24,16 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
+/**
+ * Names: Jonas, Weston, Grant, Mike
+ * Course: CIT368-01
+ * Assignment: Group Part 2
+ * Date: 4/28/2019
+ * Purpose: This is the activity that allows you to select a location for a specific task.
+ * Assumptions: Min SDK 23, Target SDK 28
+ *              Updated google play services
+ *
+ */
 
 public class MapsSelector extends FragmentActivity implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, GoogleMap.OnMapClickListener, GoogleMap.OnMapLongClickListener, OnMapReadyCallback {
 
@@ -77,25 +87,35 @@ public class MapsSelector extends FragmentActivity implements GoogleMap.OnMyLoca
         mMap.moveCamera(CameraUpdateFactory.newLatLng(sydney));
     }
 
+    /**
+     * Shows the location title tag
+     * @param location
+     */
     @Override
     public void onMyLocationClick(@NonNull Location location) {
         Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Return false so that we don't consume the event and the default behavior still occurs
+     *    (the camera animates to the user's current position).
+     * @return
+     */
     @Override
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
         return false;
     }
 
     @Override
     public void onMapClick(LatLng point) {
 
-
     }
 
+    /**
+     * On a long click it will grab the point and assign the values to the task
+     * @param point
+     */
     @Override
     public void onMapLongClick(LatLng point) {
 

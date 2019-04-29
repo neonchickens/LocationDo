@@ -31,6 +31,17 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.Statement;
 import java.util.ArrayList;
+/**
+ * Names: Jonas, Weston, Grant, Mike
+ * Course: CIT368-01
+ * Assignment: Group Part 2
+ * Date: 4/28/2019
+ * Purpose: This is to show the tasks that have been stored in the database for the user.
+ *      As well as provide a way to check competed tasks, add, remove, and edit tasks.
+ *      These task are also given a location option so they can see where the task is taking place.
+ * Assumptions: Min SDK 23, Target SDK 28
+ *
+ */
 
 public class ListActivity extends AppCompatActivity {
     private static final String TAG = "ListActivity";
@@ -71,7 +82,9 @@ public class ListActivity extends AppCompatActivity {
 
         LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
     }
-
+    /**
+     * Loads the tasks based on userid
+     */
     public void loadTasks(){
         try {
             String strStatement = "SELECT * FROM TASK JOIN USERTASK ON (TASK.ID = USERTASK.TASK_ID) WHERE USERTASK.ACCOUNT_ID = ?";
@@ -96,7 +109,9 @@ public class ListActivity extends AppCompatActivity {
         }
     }
 
-    // when the add button is pressed
+    /**
+     * Calls a alert that can be edited to add a list item.
+     */
     public void onAddClick(){
         /*
         An alert dialog can only hold one editText by default, so we create a layout
@@ -145,7 +160,12 @@ public class ListActivity extends AppCompatActivity {
         dialog.show();
     }
 
-    // open edit/delete dialog when edit button is pressed
+
+    /**
+     * Open edit/delete dialog when edit button is pressed
+     * @param position
+     * @param task
+     */
     public void onEditClick(final int position, final Task task){
         /*
         An alert dialog can only hold one editText by default, so we create a layout
@@ -236,7 +256,11 @@ public class ListActivity extends AppCompatActivity {
 
     }
 
-    // TODO - go to map activity
+    /**
+     * Goes to map activity
+     * @param position
+     * @param task
+     */
     public void onLocationClick(final int position, Task task){
 
         Intent intent = new Intent(getApplicationContext(), com.example.locationdo.MapsActivity.class);
@@ -246,7 +270,10 @@ public class ListActivity extends AppCompatActivity {
         startActivity(intent);
     }
 
-    // custom data adapter to connect listview to arraylist & init each list item
+    /**
+     * Custom data adapter to connect listview to arraylist & init each list item
+     *
+     */
     public class TaskAdapter extends ArrayAdapter<Task>  {
         public TaskAdapter(Context context, ArrayList<Task> users) {
             super(context, 0, users);
@@ -319,8 +346,9 @@ public class ListActivity extends AppCompatActivity {
             return convertView;
         }
     }
-
-    // custom task object
+    /**
+     * Custom task object
+     */
     public class Task{
 
         private int taskID;
