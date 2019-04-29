@@ -19,12 +19,21 @@ public class PasswordTests {
     @Test
     @UiThreadTest
     public void useAppContext() {
+        String goodPW = "!testG00Dpw";
+        String badPW = "fail";
+
         Register ra = rActivityRule.getActivity();
 
-        // Test 1 - check acceptable password
-        assertTrue(ra.checkPassword("!testG00Dpw"));
+        // Test 1 - check password length function
+        assertTrue(ra.validLength(goodPW));
+        assertFalse(ra.validLength(badPW));
 
-        // Test 2 - check too-short password
-        assertFalse(ra.checkPassword("fail"));
+        // Test 2 - check password required characters function
+        assertTrue(ra.hasVariedChar(goodPW));
+        assertFalse(ra.hasVariedChar(badPW));
+
+        // Test 3 - check combined checkPassword function
+        assertTrue(ra.checkPassword(goodPW));
+        assertFalse(ra.checkPassword(badPW));
     }
 }

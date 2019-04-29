@@ -100,7 +100,7 @@ public class Register extends AppCompatActivity {
      * Should toast only when
      * password  doesn't have a special character and a number
      */
-    private boolean hasVariedChar(String str){
+    public boolean hasVariedChar(String str){
         boolean valid = false;
 
         if(str.matches("^.*\\d.*$") && str.matches("^.*\\W.*$")) {
@@ -118,7 +118,7 @@ public class Register extends AppCompatActivity {
      * @param str
      * @return
      */
-    private boolean validLength(String str){
+    public boolean validLength(String str){
         boolean valid = false;
 
         if(str.length() >= 8)

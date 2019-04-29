@@ -1,12 +1,8 @@
 package com.example.locationdo;
 
-import android.content.Context;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
-import android.widget.EditText;
 
-import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -30,9 +26,9 @@ public class LoginTests {
     public void useAppContext() {
         LoginActivity la = lActivityRule.getActivity();
 
-        // Test 3 - Check initial login state
-        //assertTrue(!la.attemptTime.getText().equals(""));
-        //assertEquals(la.loginAttempts, 0);
+        // Test 4 - Check initial login state
+        assertTrue(la.attemptTime.getText().equals(""));
+        assertEquals(la.loginAttempts, 0);
 
         //Writes text into an edit text field
         onView(withId(R.id.enterUsername)).perform(clearText(),typeText("test"));
@@ -45,7 +41,7 @@ public class LoginTests {
         onView(withId(R.id.button)).perform(click());
         onView(withId(R.id.button)).perform(click());
 
-        // Test 4 - Check that timeout is set after 3 failed attempts
+        // Test 5 - Check that timeout is set after 3 failed attempts
         assertEquals(la.loginAttempts, 3);
         assertFalse(!la.attemptTime.getText().equals(""));
 
