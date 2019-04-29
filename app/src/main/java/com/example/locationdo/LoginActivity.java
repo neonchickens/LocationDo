@@ -54,7 +54,7 @@ public class LoginActivity extends AppCompatActivity {
      * Method for the intent to log in to map activity
      * @param view
      */
-    public void transition() {
+    public void transition(View view) {
 
         String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());

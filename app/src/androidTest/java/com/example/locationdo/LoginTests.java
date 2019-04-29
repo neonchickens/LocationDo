@@ -11,6 +11,12 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import static android.support.test.espresso.Espresso.onView;
+import static android.support.test.espresso.action.ViewActions.clearText;
+import static android.support.test.espresso.action.ViewActions.click;
+import static android.support.test.espresso.action.ViewActions.closeSoftKeyboard;
+import static android.support.test.espresso.action.ViewActions.typeText;
+import static android.support.test.espresso.matcher.ViewMatchers.withId;
 import static junit.framework.TestCase.assertTrue;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -20,33 +26,33 @@ public class LoginTests {
     @Rule
     public ActivityTestRule<LoginActivity> lActivityRule = new ActivityTestRule(LoginActivity.class);
 
-    LoginActivity testLogin;
-
-    @Before
-    public void setUp() throws Exception{
-        lActivityRule.launchActivity(null);
-        testLogin = lActivityRule.getActivity();
-    }
-
     @Test
     public void useAppContext() {
-        // Context of the app under test.
-        Context appContext = InstrumentationRegistry.getTargetContext();
-
-        LoginActivity testLogin = new LoginActivity();
-
-        testLogin.username.setText("bob");
-        testLogin.password.setText("failtest");
+        LoginActivity la = lActivityRule.getActivity();
 
         // Test 3 - Check initial login state
-        assertTrue(!testLogin.attemptTime.getText().equals(""));
-        assertEquals(testLogin.loginAttempts, 0);
+        //assertTrue(!la.attemptTime.getText().equals(""));
+        //assertEquals(la.loginAttempts, 0);
 
-        testLogin.transition();
-        testLogin.transition();
+        //Writes text into an edit text field
+        onView(withId(R.id.enterUsername)).perform(clearText(),typeText("test"));
+        onView(withId(R.id.enterPassword)).perform(clearText(),typeText("fail"));
+
+        assertEquals(la.loginAttempts, 0);
+        assertFalse(!la.attemptTime.getText().equals(""));
+
+        onView(withId(R.id.button)).perform(closeSoftKeyboard(), click());
+        onView(withId(R.id.button)).perform(click());
+        onView(withId(R.id.button)).perform(click());
 
         // Test 4 - Check that timeout is set after 3 failed attempts
-        assertEquals(testLogin.loginAttempts, 3);
-        assertFalse(!testLogin.attemptTime.getText().equals(""));
+        assertEquals(la.loginAttempts, 3);
+        assertFalse(!la.attemptTime.getText().equals(""));
+
+        onView(withId(R.id.button)).perform(click());
+
+        assertEquals(la.loginAttempts, 4);
+        assertFalse(la.attemptTime.getText().equals(""));
+
     }
 }
