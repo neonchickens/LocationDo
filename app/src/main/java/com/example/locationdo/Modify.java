@@ -55,23 +55,26 @@ public class Modify extends AppCompatActivity {
 
         String strPassword = SHA512(password.getText().toString());
 
-        try {
-            String strStatement = "UPDATE ACCOUNT SET password = ? WHERE id = ?";
-            PreparedStatement psUpdate = Settings.getInstance().getConnection().prepareStatement(strStatement);
-            psUpdate.setString(1, strPassword);
-            psUpdate.setInt(2, id);
-            int result = psUpdate.executeUpdate();
-            if (result == 1) {
-                Intent returnIntent = new Intent();
-                setResult(RESULT_OK, returnIntent);
-                finish();
+        if(checkPassword(password.getText().toString())){
+            try {
+                String strStatement = "UPDATE ACCOUNT SET password = ? WHERE id = ?";
+                PreparedStatement psUpdate = Settings.getInstance().getConnection().prepareStatement(strStatement);
+                psUpdate.setString(1, strPassword);
+                psUpdate.setInt(2, id);
+                int result = psUpdate.executeUpdate();
+                if (result == 1) {
+                    Intent returnIntent = new Intent();
+                    setResult(RESULT_OK, returnIntent);
+                    finish();
+                }
+
+                psUpdate.close();
+            } catch (Exception e) {
+                e.printStackTrace();
             }
-
-            psUpdate.close();
-        } catch (Exception e) {
-            e.printStackTrace();
+        }else {
+            Toast.makeText(this, "Password does not meet requirements.", Toast.LENGTH_LONG).show();
         }
-
     }
 
     /**
@@ -95,14 +98,11 @@ public class Modify extends AppCompatActivity {
 
     /**
      * checks that password meets min requirements
-     * @param editText
+     * @param strpw
      */
-    private boolean checkPassword(EditText editText){
-        String pw;
+    public boolean checkPassword(String strpw){
         boolean valid = false;
-        password = findViewById(R.id.enterPassword);
-        pw = password.getText().toString();
-        if(hasVariedChar(pw) && validLength(pw))
+        if(hasVariedChar(strpw) && validLength(strpw))
             valid = true;
 
         return valid;
@@ -117,7 +117,7 @@ public class Modify extends AppCompatActivity {
     private boolean hasVariedChar(String str){
         boolean valid = false;
 
-        if(Pattern.matches("\\d", str) && Pattern.matches("[^A-Za-z0-9]", str)) {
+        if(str.matches("^.*\\d.*$") && str.matches("^.*\\W.*$")) {
             valid = true;
         } else {
             password.clearComposingText();
