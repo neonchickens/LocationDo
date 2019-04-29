@@ -16,11 +16,17 @@ import java.sql.DriverManager;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.regex.Pattern;
+/**
+ * Names: Jonas, Weston, Grant, Mike
+ * Course: CIT368-01
+ * Assignment: Group Part 2
+ * Date: 4/28/2019
+ * Purpose: This is the activity where you can change your known password to a different one.
+ * Assumptions: Min SDK 23, Target SDK 28
+ *
+ */
 
 /**
- * This is the Registration Activity for the LocationDo app
- * Should allow user to register with a password that meets requirements.
- * Sends username and password to corresponding login EditText boxes if valid.
  * **PASSWORD VALIDATIION NEEDS FIXED IN hasVariedChar() THEN IMPLEMENTED IN transition()**
  */
 public class Modify extends AppCompatActivity {
@@ -68,6 +74,10 @@ public class Modify extends AppCompatActivity {
 
     }
 
+    /**
+     * Hashing method using SHA512 for using the password
+     * @param strPassword
+     */
     private static String SHA512(String strPassword) {
         try {
             MessageDigest md = MessageDigest.getInstance("SHA-512");
@@ -97,10 +107,12 @@ public class Modify extends AppCompatActivity {
 
         return valid;
     }
+
     /**
      * checks password meets character type requirements
      * I can't get the pattern to match. I'm not sure if I'm using the wrong method or if my regex's are wrong. Should toast only when
      * password  doesn't have a special character and a number
+     * @param str
      */
     private boolean hasVariedChar(String str){
         boolean valid = false;

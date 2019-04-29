@@ -16,6 +16,16 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
+/**
+ * Names: Jonas, Weston, Grant, Mike
+ * Course: CIT368-01
+ * Assignment: Group Part 2
+ * Date: 4/28/2019
+ * Purpose: This shows your current location and the location of the current selected task.
+ * Assumptions: Min SDK 23, Target SDK 28
+ *              Updated google play services
+ *
+ */
 
 public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLocationButtonClickListener, GoogleMap.OnMyLocationClickListener, OnMapReadyCallback {
 
@@ -50,6 +60,7 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
      * If Google Play services is not installed on the device, the user will be prompted to install
      * it inside the SupportMapFragment. This method will only be triggered once the user has
      * installed Google Play services and returned to the app.
+     * @param googleMap
      */
     @Override
     public void onMapReady(GoogleMap googleMap) {
@@ -69,16 +80,23 @@ public class MapsActivity extends FragmentActivity implements GoogleMap.OnMyLoca
         mMap.animateCamera(CameraUpdateFactory.newLatLngZoom(mark, 15.0f));
     }
 
+    /**
+     * Shows the location title tag
+     * @param location
+     */
     @Override
     public void onMyLocationClick(@NonNull Location location) {
         Toast.makeText(this, "Current location:\n" + location, Toast.LENGTH_LONG).show();
     }
 
+    /**
+     * Return false so that we don't consume the event and the default behavior still occurs
+     *    (the camera animates to the user's current position).
+     * @return
+     */
     @Override
     public boolean onMyLocationButtonClick() {
         Toast.makeText(this, "MyLocation button clicked", Toast.LENGTH_SHORT).show();
-        // Return false so that we don't consume the event and the default behavior still occurs
-        // (the camera animates to the user's current position).
         return false;
     }
 }

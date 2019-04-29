@@ -30,16 +30,26 @@ import java.sql.Timestamp;
 import static android.provider.Settings.Secure.ANDROID_ID;
 
 /**
- * This is the login activity for LocationDo app.
+ * Names: Jonas, Weston, Grant, Mike
+ * Course: CIT368-01
+ * Assignment: Group Part 2
+ * Date: 4/28/2019
+ * Purpose: This is the login activity for LocationDo app. The first screen when logged in it provides a
+ *      method to access the list activity, modify activity, and register activity.
+ * Assumptions: Min SDK 23, Target SDK 28
+ *
+ *
  * It is missing code for checking username and password with database as well as a transition to the map after
  * login is verified. Includes an intent to register if user is not already registered
  */
+
 public class LoginActivity extends AppCompatActivity {
+    //Elements in the Login Activity
     EditText username;
     EditText password;
-  
     TextView attemptTime;
     int loginAttempts;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +61,10 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+
+    /**
+     * Resets the password on activity resume
+     */
     @Override
     protected void onResume()
     {
@@ -64,7 +78,7 @@ public class LoginActivity extends AppCompatActivity {
      * @param view
      */
     public void transition(View view) {
-
+        //Getting username and calling a hash method for the password
         String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());
 
@@ -80,7 +94,6 @@ public class LoginActivity extends AppCompatActivity {
             if (rsSelect.next() && attemptTime.getText().equals("")) {
                 int id = rsSelect.getInt("id");
                 if (id != -1) {
-
                     //Log log in attempt
                     strStatement = "INSERT INTO LOG (accountid, deviceid) VALUES (?, ?)";
                     PreparedStatement psInsert = Settings.getInstance().getConnection().prepareStatement(strStatement);
@@ -93,9 +106,11 @@ public class LoginActivity extends AppCompatActivity {
                     intent.putExtra("id", id);
                     startActivity(intent);
                 }
-            }else if(!attemptTime.getText().equals("")){
+            } else if(!attemptTime.getText().equals("")){
+                //Preventing the user from resetting the timer
                 Toast.makeText(this,"Wait for current timer", Toast.LENGTH_LONG).show();
             }else if(loginAttempts >= 3){
+                //Starts the timer and resets the login attempts
                 Toast.makeText(this,"To many attempts, wait for timer.", Toast.LENGTH_LONG).show();
                 String num = Integer.toString(loginAttempts);
                 Log.w("Login Attempts", "Login attempt number: " + num);
@@ -103,14 +118,13 @@ public class LoginActivity extends AppCompatActivity {
                 new CountDownTimer(1000 * 60 * 3, 1000){ public void onTick(long millisUntilFinished) {
                     attemptTime.setText("seconds remaining: " + millisUntilFinished / 1000);
                 }
-
                     public void onFinish() {
                         attemptTime.setText("");
                         loginAttempts = 0;
                     }}.start();
             }
             else{
-                //Notify user of incorrect submission
+                //Notifies the user for invalid login attempts
                 Toast.makeText(this,"Incorrect Password or Username", Toast.LENGTH_LONG).show();
                 loginAttempts++;
             }
@@ -123,6 +137,10 @@ public class LoginActivity extends AppCompatActivity {
 
     }
 
+    /**
+     * Hashing method using SHA512 for using the password
+     * @param strPassword
+     */
     private static String SHA512(String strPassword) {
         try {
             //Hashes password using secure SHA512
@@ -148,7 +166,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * Method for validating password with username's storesd password
+     * Method for validating password with username's stored password
      */
     private void validatePassword(EditText editText){
 
@@ -156,13 +174,18 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     /**
-     * sends user to register activity
+     * Sends user to register activity
      * @param view
      */
     public void register(View view) {
         Intent intent = new Intent(this, com.example.locationdo.Register.class);
         startActivityForResult(intent, 1);
     }
+
+    /**
+     * Sends the user to the modify activity, with checking credentials
+     * @param view
+     */
     public void modify(View view) {
         String strUsername = username.getText().toString();
         String strPassword = SHA512(password.getText().toString());
@@ -176,22 +199,43 @@ public class LoginActivity extends AppCompatActivity {
 
             //Get sql results
             ResultSet rsSelect = psSelect.getResultSet();
-            while (rsSelect.next()) {
+            if (rsSelect.next() && attemptTime.getText().equals("")) {
                 int id = rsSelect.getInt("id");
                 if (id != -1) {
-                    Toast.makeText(this,"Success", Toast.LENGTH_LONG);
-
                     Intent intent = new Intent(this, com.example.locationdo.Modify.class);
                     intent.putExtra("id", id);
                     startActivity(intent);
                 } else {
                     Toast.makeText(this,"Failure", Toast.LENGTH_LONG);
                 }
+            } else if(!attemptTime.getText().equals("")){
+                //Preventing the user from resetting the timer
+                Toast.makeText(this,"Wait for current timer", Toast.LENGTH_LONG).show();
+            }else if(loginAttempts >= 3){
+                //Starts the timer and resets the login attempts
+                Toast.makeText(this,"To many attempts, wait for timer.", Toast.LENGTH_LONG).show();
+                String num = Integer.toString(loginAttempts);
+                Log.w("Login Attempts", "Login attempt number: " + num);
+                loginAttempts++;
+                new CountDownTimer(1000 * 60 * 3, 1000){ public void onTick(long millisUntilFinished) {
+                    attemptTime.setText("seconds remaining: " + millisUntilFinished / 1000);
+                }
 
+                    public void onFinish() {
+                        attemptTime.setText("");
+                        loginAttempts = 0;
+                    }}.start();
             }
+            else{
+                //Notifies the user for invalid login attempts
+                Toast.makeText(this,"Incorrect Password or Username", Toast.LENGTH_LONG).show();
+                loginAttempts++;
+            }
+
             rsSelect.close();
         } catch (Exception e) {
             e.printStackTrace();
+
         }
     }
 
